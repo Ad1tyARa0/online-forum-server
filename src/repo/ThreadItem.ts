@@ -1,10 +1,18 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+} from "typeorm";
 import { Length } from "class-validator";
 import { User } from "./User";
 import { Thread } from "./Thread";
+import { ThreadItemPoint } from "./ThreadItemPoints";
+import { Auditable } from "./Auditable";
 
 @Entity({ name: "ThreadItems" })
-export class ThreadItem {
+export class ThreadItem extends Auditable {
   @PrimaryGeneratedColumn({ name: "Id", type: "bigint" })
   id: string;
 
@@ -23,4 +31,10 @@ export class ThreadItem {
 
   @ManyToOne(() => Thread, thread => thread.threadItems)
   thread: Thread;
+
+  @OneToMany(
+    () => ThreadItemPoint,
+    threadItemPoint => threadItemPoint.threadItem
+  )
+  threadItemPoints: ThreadItemPoint[];
 }

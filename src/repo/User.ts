@@ -1,9 +1,12 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
 import { Length } from "class-validator";
 import { Thread } from "./Thread";
+import { ThreadPoint } from "./ThreadPoints";
+import { ThreadItemPoint } from "./ThreadItemPoints";
+import { Auditable } from "./Auditable";
 
 @Entity({ name: "Users" })
-export class User {
+export class User extends Auditable {
   @PrimaryGeneratedColumn({ name: "Id", type: "bigint" })
   Id: string;
 
@@ -35,4 +38,10 @@ export class User {
 
   @OneToMany(() => Thread, thread => thread.user)
   threads: Thread[];
+
+  @OneToMany(() => ThreadPoint, threadPoint => threadPoint.user)
+  threadPoints: ThreadPoint[];
+
+  @OneToMany(() => ThreadItemPoint, threadItemPoint => threadItemPoint.user)
+  threadItemPoints: ThreadItemPoint[];
 }

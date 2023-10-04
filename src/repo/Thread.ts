@@ -8,9 +8,12 @@ import {
 import { Length } from "class-validator";
 import { User } from "./User";
 import { ThreadItem } from "./ThreadItem";
+import { ThreadPoint } from "./ThreadPoints";
+import { ThreadCategory } from "./ThreadCategories";
+import { Auditable } from "./Auditable";
 
 @Entity({ name: "Threads" })
-export class Thread {
+export class Thread extends Auditable {
   @PrimaryGeneratedColumn({ name: "Id", type: "bigint" })
   id: string;
 
@@ -33,4 +36,10 @@ export class Thread {
 
   @OneToMany(() => ThreadItem, threadItems => threadItems.thread)
   threadItems: ThreadItem[];
+
+  @OneToMany(() => ThreadPoint, threadPoint => threadPoint.thread)
+  threadPoints: ThreadPoint[];
+
+  @ManyToOne(() => ThreadCategory, threadCategory => threadCategory.threads)
+  category: ThreadCategory;
 }

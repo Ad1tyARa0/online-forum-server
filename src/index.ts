@@ -5,7 +5,8 @@ import Redis from "ioredis";
 import session from "express-session";
 import { createConnection } from "typeorm";
 import bodyParser from "body-parser";
-import { login, register } from "./repo/UserRepo";
+import { login, logout, register } from "./repo/UserRepo";
+import { createThread } from "./repo/ThreadRepo";
 // import { DataSource } from "typeorm";
 // import { User } from "./repo/User";
 
@@ -124,6 +125,44 @@ const main = async () => {
       }
     } catch (error) {
       res.send(error.message);
+    }
+  });
+
+  router.post("/logout", async (req: any, res, next) => {
+    try {
+      console.log("params", req.body);
+
+      const msg = await logout(req.body.userName);
+
+      if (msg) {
+        req.session!.userId = null;
+        res.send(msg);
+      } else {
+        next();
+      }
+    } catch (ex) {
+      console.log(ex);
+      res.send(ex.message);
+    }
+  });
+
+  router.post("/createthread", async (req: any, res, next) => {
+    try {
+      console.log("userid", req.session);
+
+      console.log("body", req.body);
+
+      const msg = await createThread(
+        req.session!.userId,
+        req.body.categoryId,
+        req.body.title,
+        req.body.body
+      );
+
+      res.send(msg);
+    } catch (error) {
+      console.log(error);
+      res.send(error);
     }
   });
 

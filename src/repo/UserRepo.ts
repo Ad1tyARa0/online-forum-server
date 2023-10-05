@@ -83,6 +83,18 @@ export const login = async (
   };
 };
 
+export const logout = async (userName: string): Promise<string> => {
+  const user = await User.findOne({
+    where: { userName },
+  });
+
+  if (!user) {
+    return userNotFound(userName);
+  }
+
+  return "User logged off.";
+};
+
 function userNotFound(userName: string) {
   return `User with userName ${userName} not found.`;
 }

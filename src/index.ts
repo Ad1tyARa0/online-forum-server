@@ -4,6 +4,8 @@ import express from "express";
 import Redis from "ioredis";
 import session from "express-session";
 import { createConnection } from "typeorm";
+import bodyParser from "body-parser";
+import { login, register } from "./repo/UserRepo";
 // import { DataSource } from "typeorm";
 // import { User } from "./repo/User";
 
@@ -57,6 +59,8 @@ const main = async () => {
     client: redis,
   });
 
+  app.use(bodyParser.json());
+
   app.use(
     session({
       store: redisStore,
@@ -75,18 +79,52 @@ const main = async () => {
   );
 
   app.use(router);
-  router.get("/", (req: any, res, next) => {
-    if (!req.session!.userid) {
-      req.session!.userid = req.query.userid;
-      console.log("user id is set");
-      req.session!.loadedCount = 0;
-    } else {
-      req.session!.loadedCount = Number(req.session!.loadedCount) + 1;
-    }
 
-    res.send(
-      `userid: ${req.session!.userid}, loadedCount: ${req.session!.loadedCount}`
-    );
+  router.get("/", (req: any, res, next) => {
+    req.session!.test = "hello";
+    res.send("hello");
+  });
+
+  router.post("/register", async (req: any, res, next) => {
+    try {
+      console.log("params", req.body);
+
+      const userResult = await register(
+        req.body.email,
+        req.body.userName,
+        req.body.password
+      );
+
+      if (userResult && userResult.user) {
+        res.send(`New user created!, userId: ${userResult.user.Id}`);
+      } else if (userResult && userResult.messages) {
+        res.send(userResult.messages[0]);
+      } else {
+        next();
+      }
+    } catch (error) {
+      res.send(error.message);
+    }
+  });
+
+  router.post("/login", async (req: any, res, next) => {
+    try {
+      console.log("params", req.body);
+
+      const userResult = await login(req.body.userName, req.body.password);
+
+      if (userResult && userResult.user) {
+        req.session!.userId = userResult.user.Id;
+
+        res.send(`user logged in, userId: ${req.session!.userId}`);
+      } else if (userResult && userResult.messages) {
+        res.send(userResult.messages[0]);
+      } else {
+        next();
+      }
+    } catch (error) {
+      res.send(error.message);
+    }
   });
 
   app.listen({ port: process.env.SERVER_PORT }, () => {
